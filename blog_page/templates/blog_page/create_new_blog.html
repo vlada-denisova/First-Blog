@@ -1,0 +1,31 @@
+{% extends 'blog_page/base_page.html'%}
+
+{% block title %}
+ New Blog
+ {% endblock %}
+
+{% block content %}
+
+{% if user.blogauthor.blog  %}
+<h1>You're can have only one blog. </h1>
+
+{% else %}
+
+<h1>Create new blog</h1>
+
+<form action="." method="POST" class="blog-form">
+ {% csrf_token %}
+ <div class="form-group">
+    <label for="exampleFormControlInput1">Name blog</label>
+    <input name="name_blog" type="text" class="form-control" id="exampleFormControlInput1" placeholder="Name blog">
+  </div>
+ <div class="form-group">
+    <label for="exampleFormControlTextarea1">Description</label>
+    <textarea name="description" class="form-control" id="exampleFormControlTextarea1" rows="3"
+              placeholder="Description"></textarea>
+  </div>
+<button type="submit" class="btn btn-dark mb-2">Create blog</button>
+
+</form>
+{% endif%}
+{% endblock %}
