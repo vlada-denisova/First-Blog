@@ -1,7 +1,7 @@
 {% extends 'blog_page/base_page.html'%}
 {% block title %}
-    Post
- {% endblock %}
+Post
+{% endblock %}
 
 {% block content %}
 
@@ -11,47 +11,98 @@
 <p>All view: {{sum_views}}</p>
 <p>{{post.text_post_markdown|safe}}</p>
 
-<h3>Comments</h3>
 
+<h3>Comments</h3>
+{% if post.setting_comments %}
 <p><h5>Create new comment:</h5></p>
 {% if user.is_authenticated %}
 <form action="{% url 'create_new_comment' blog.id post.id %}" method="POST" class="create-new-comment-for-auth-user">
- {% csrf_token %}
-  <div class="form-group">
-    <textarea name="text_comment" class="form-control" id="exampleFormControlTextarea1" rows="3"
-              placeholder="Text comment"></textarea>
-  </div>
- <button type="submit" class="btn btn-dark">Comment</button>
+    {% csrf_token %}
+    <div class="form-group">
+        <textarea name="text_comment" class="form-control" id="exampleFormControlTextarea1" rows="3"
+                  placeholder="Text comment"></textarea>
+    </div>
+    <button type="submit" class="btn btn-dark">Comment</button>
 </form>
 
 {% else %}
 
-<form action="{% url 'create_new_comment' blog.id post.id %}" method="POST" class="create-new-comment-for-unknown-user">
- {% csrf_token %}
-  <div class="form-group">
-    <label for="exampleInputEmail1">Email address</label>
-    <input name="email"  type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
-           placeholder="Enter email">
-  </div>
-  <div class="form-group">
-
-    <textarea name="text_comment" class="form-control" id="exampleFormControlTextarea2" rows="2"
-              placeholder="Text comment"></textarea>
-  </div>
- <button type="submit" class="btn btn-dark">Comment</button>
-    {% endif %}
-
-    <p><p>All comments: {{ sum_comment }} </p></p>
 <p>
-{% for com in comment %}
-<h6>
-   {{com.text_comment}}
-</h6>
-    <p>Автор: {{com.author_comment}} {{com.date_publ}}</p>
+<form action="{% url 'create_new_comment' blog.id post.id %}" method="POST" class="create-new-comment-for-unknown-user">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="exampleInputEmail1">Email address</label>
+        <input name="email" type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+               placeholder="Enter email">
+    </div>
+    <div class="form-group">
 
-
-    {% endfor %}
+        <textarea name="text_comment" class="form-control" id="exampleFormControlTextarea2" rows="2"
+                  placeholder="Text comment"></textarea>
+    </div>
+<button type="submit" class="btn btn-dark">Comment</button>
+</form>
 </p>
+{% endif %}
+{% else %}
+<p>You can't comment this post</p>
+{% endif %}
 
+<p><p>All comments: {{ sum_comment }} </p></p>
+<p>
+    {% for com in comment %}
+<h6>
+    {{com.text_comment }}
+</h6>
+<p>Автор: {{com.author_comment}} {{com.date_publ}}</p>
 
+</p>
+{% if post.setting_comments %}
+<p><h5>Comment:</h5></p>
+{% if user.is_authenticated %}
+<ul>
+<p><form action="{% url 'comment_for_comment' blog.id post.id com.id %}" method="POST"
+      class="create-new-comment-for-auth-user">
+    {% csrf_token %}
+    <div class="form-group">
+                <textarea name="text_comment" class="form-control" id="exampleFormControlTextarea3" rows="3"
+                          placeholder="Text comment"></textarea>
+    </div>
+    <button type="submit" class="btn btn-dark">Comment</button>
+</form></p>
+</ul>
+{% else %}
+<ul>
+<p><form action="{% url 'comment_for_comment' blog.id post.id com.id %}" method="POST"
+      class="create-new-comment-for-unknown-user">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="exampleInputEmail1">Email address</label>
+        <input name="email" type="email" class="form-control" id="exampleInputEmail4" aria-describedby="emailHelp"
+               placeholder="Enter email">
+    </div>
+    <div class="form-group">
+
+                <textarea name="text_comment" class="form-control" id="exampleFormControlTextarea4" rows="2"
+                          placeholder="Text comment"></textarea>
+    </div>
+    <button type="submit" class="btn btn-dark">Comment</button>
+</form></p>
+</ul>
+{% endif %}
+{% else %}
+<p>You can't comment this post</p>
+{% endif %}
+<p><p>
+    {% for inserted_comment in com.comment_set.all %}
+    <h8>
+      <ul> {{ inserted_comment.text_comment }}</ul>
+    </h8>
+
+<ul><p>Автор: {{ inserted_comment.author_comment}} {{com.date_publ}}</p></ul>
+
+</p></p>
+
+{% endfor %}
+{% endfor %}
 {% endblock %}

@@ -6,7 +6,7 @@ from markdownx.admin import MarkdownxModelAdmin
 
 from .models import *
 
-admin.site.register(BlogAuthor)
+
 admin.site.register(Blog)
 admin.site.register(Comment)
 admin.site.register(Statistic)

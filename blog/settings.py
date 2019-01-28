@@ -42,6 +42,8 @@ INSTALLED_APPS = [
 
 ]
 
+AUTH_USER_MODEL = 'blog_page.User'
+
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
 ACCOUNT_EMAIL_REQUIRED = True
@@ -95,7 +97,7 @@ WSGI_APPLICATION = 'blog.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "postgres",
+        "NAME": "blogdb",
         "USER": "vladislavadenisova",
         "PASSWORD": "",
         "HOST": "localhost",

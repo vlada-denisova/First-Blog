@@ -6,10 +6,10 @@
 
 {% block content %}
 
-{% if user.blogauthor.blog  %}
+{% if user.blog.author  %}
 <h1>You're can have only one blog. </h1>
 
-{% else %}
+{% elif user.is_authenticated %}
 
 <h1>Create new blog</h1>
 
@@ -27,5 +27,10 @@
 <button type="submit" class="btn btn-dark mb-2">Create blog</button>
 
 </form>
+{% else %}
+<p><h1>You're need log in for create blog. </h1></p>
+
+
+<p><p><a href="{% url 'login' %}" class="btn btn-secondary btn-lg active" role="button" aria-pressed="true">Log in</a></p></p>
 {% endif%}
 {% endblock %}

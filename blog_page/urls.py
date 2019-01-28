@@ -11,8 +11,9 @@ urlpatterns = [
     path('logout/', views.log_out, name='logout'),
     path('create_new_blog/', views.create_new_blog, name= 'create_new_blog'),
     path('blog_detail/<int:blog_id>/create_new_post/', views.create_new_post, name= 'create_new_post'),
-    path('blog_detail/<int:blog_id>/post_detail/<int:post_id>/create_new_comment/', views.create_new_comment, name= 'create_new_comment'),
-
-
+    path('blog_detail/<int:blog_id>/post_detail/<int:post_id>/create_new_comment/', views.create_new_comment,
+         name= 'create_new_comment'),
+    path('blog_detail/<int:blog_id>/post_detail/<int:post_id>/<int:comment_id>/comment_for_comment/',
+         views.comment_for_comment, name= 'comment_for_comment'),
 
 ]

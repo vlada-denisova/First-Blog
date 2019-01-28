@@ -1,14 +1,15 @@
 from django import forms
 from .models import *
 
+
 class RegistrationForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ('email', 'username')
+        fields = ('email', )
 
 
 class LoginForm(forms.Form):
-    username = forms.CharField( widget=forms.EmailInput())
+    email = forms.CharField( widget=forms.EmailInput())
     password = forms.CharField(widget=forms.PasswordInput())
 
 class BlogForm(forms.ModelForm):
@@ -19,7 +20,7 @@ class BlogForm(forms.ModelForm):
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ('title', 'preview', 'text_post', 'attr_to_view')
+        fields = ('title', 'preview', 'text_post', 'attr_to_view', 'setting_comments')
 
 class CreateNewCommentForUnknownUser(forms.ModelForm):
     class Meta:
@@ -29,7 +30,7 @@ class CreateNewCommentForUnknownUser(forms.ModelForm):
 class CreateNewCommentForAuthUser(forms.ModelForm):
     class Meta:
         model = Comment
-        fields = ('text_comment',)
+        fields = ('text_comment', )
 
 
 

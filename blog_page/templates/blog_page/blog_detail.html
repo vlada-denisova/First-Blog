@@ -6,13 +6,13 @@
 {% block content %}
 
 <h1 class="mb-10">Blog:</h1>
-{% if blog.author == user.blogauthor %}
+{% if blog.author == user %}
 <h2>
     <a class="btn btn-dark" href="{% url 'create_new_post' blog.id %}" role="button">Create new post</a>
 </h2>
 {% endif %}
-    {% for post in posts %}
 
+    {% for post in posts %}
         <h3>
             <a href="{% url 'post_detail' blog.id post.id%}">
             {{ post }}

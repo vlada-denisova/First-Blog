@@ -1,14 +1,15 @@
 from django.shortcuts import render,redirect, get_object_or_404
 from django.core.mail import send_mail
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.core.paginator import Paginator
 from django.db.models import Count
-from datetime import datetime
 from .forms import *
 from .models import *
 import random
+import datetime
 
 
 
@@ -24,7 +25,7 @@ def blog_detail(request, blog_id):
     """Страница блога со всеми постами"""
     blog = get_object_or_404(Blog, id = blog_id)
     all_post = blog.post_set.all()
-    if request.user != blog.author.user:
+    if request.user != blog.author:
         all_post = all_post.exclude(attr_to_view=False)
     paginator = Paginator(all_post, 1)
     page = request.GET.get('page')
@@ -35,18 +36,19 @@ def blog_detail(request, blog_id):
 def post_detail(request, blog_id, post_id):
     """Страница поста"""
     blog = get_object_or_404(Blog, id = blog_id)
-    post = get_object_or_404(blog.post_set, id = post_id)
+    posts = blog.post_set\
+        .annotate(comment_count=Count('comment'))\
+        .annotate(view_count=Count('statistic'))
+    post = get_object_or_404(posts, id = post_id)
     if request.user.is_authenticated:
-        guest = request.user.blogauthor
+        guest = request.user
     else:
         guest = None
-    Statistic.objects.create(ip_adres= request.META.get('REMOTE_ADDR'), guest= guest, date_visit= datetime.now(),
+    Statistic.objects.create(ip_adres= request.META.get('REMOTE_ADDR'), guest= guest, date_visit= datetime.datetime.now(),
                              view_post= post , entry_page= request.META.get('HTTP_REFERER'))
-    sum_views = post.statistic_set.count()
-    comment = post.comment_set.all()
-    sum_comment = comment.count()
+    comment = post.get_first_level_comments()
     return render(request, 'blog_page/post_detail.html', context={'post': post, 'comment': comment, 'blog': blog,
-                            'sum_comment': sum_comment, 'sum_views': sum_views})
+                            'sum_comment': post.comment_count, 'sum_views': post.view_count})
 
 def registration(request):
     """Регистрация пользователя и отправка ему пароля на почту"""
@@ -60,8 +62,6 @@ def registration(request):
             user.save()
             send_mail(subject= "Твой пароль.", message= password_for_user, from_email= "You'r blog",
                       recipient_list= [user.email])
-            blog_author = BlogAuthor(user= user)
-            blog_author.save()
             return redirect('blogs_list')
         else:
             return render(request, 'blog_page/registration.html', context={'registration_form':registration_form})
@@ -74,13 +74,13 @@ def log_in(request):
     if request.method == 'POST':
         login_form = LoginForm(request.POST)
         if login_form.is_valid():
-            user = authenticate(request, username= login_form.cleaned_data['username'],
+            user = authenticate(request, email= login_form.cleaned_data['email'],
                                 password= login_form.cleaned_data['password'])
             if user is not None:
                 login(request, user)
                 return redirect('blogs_list')
             else:
-                messages.add_message(request, messages.ERROR, "Неверный логин/пароль")
+                messages.add_message(request, messages.ERROR, "Неверный email/пароль")
                 return render(request, 'blog_page/log_in.html', context={'login_form': login_form})
         else:
             return render(request, 'blog_page/log_in.html', context={'login_form': login_form})
@@ -99,7 +99,7 @@ def create_new_blog(request):
         blog_form = BlogForm(request.POST)
         if blog_form.is_valid():
             blog = blog_form.save(commit=False)
-            blog.author = request.user.blogauthor
+            blog.author = request.user
             blog.save()
             return redirect('blog_detail', blog_id=blog.id)
         else:
@@ -116,7 +116,7 @@ def create_new_post(request, blog_id):
         if post_form.is_valid():
             post = post_form.save(commit=False)
             post.blog = blog
-            post.author = request.user.blogauthor
+            post.author = request.user
             post.save()
             return redirect('post_detail',blog_id=blog.id, post_id= post.id)
         else:
@@ -139,11 +139,32 @@ def create_new_comment(request, blog_id, post_id):
         if commt_form.is_valid():
             comment = commt_form.save(commit=False)
             comment.author_comment = author
+            comment.blog = post
+            comment.save()
+        # print(commt_form.errors)
+    return redirect('post_detail', blog_id=blog.id, post_id=post.id)
 
+def comment_for_comment(request, blog_id, post_id, comment_id):
+    blog = get_object_or_404(Blog, id=blog_id)
+    post = get_object_or_404(Post, id=post_id)
+    parent_comment = get_object_or_404(Comment, id=comment_id)
+    if request.method == 'POST':
+        if request.user.is_authenticated:
+            author = request.user
+            commt_form = CreateNewCommentForAuthUser(request.POST)
+        else:
+            commt_form = CreateNewCommentForUnknownUser(request.POST)
+            author = None
+        if commt_form.is_valid():
+            comment = commt_form.save(commit=False)
+            comment.parent_comment = parent_comment
+            comment.author_comment = author
             comment.blog = post
             comment.save()
         print(commt_form.errors)
-    return redirect('post_detail', blog_id=blog.id, post_id=post.id)
+    return redirect('post_detail', blog_id=blog.id, post_id= post.id)
+
+
 
 
 
