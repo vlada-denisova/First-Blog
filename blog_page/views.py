@@ -36,19 +36,19 @@ def blog_detail(request, blog_id):
 def post_detail(request, blog_id, post_id):
     """Страница поста"""
     blog = get_object_or_404(Blog, id = blog_id)
-    posts = blog.post_set\
-        .annotate(comment_count=Count('comment'))\
-        .annotate(view_count=Count('statistic'))
-    post = get_object_or_404(posts, id = post_id)
+    post = get_object_or_404(Post, id = post_id)
     if request.user.is_authenticated:
         guest = request.user
     else:
         guest = None
     Statistic.objects.create(ip_adres= request.META.get('REMOTE_ADDR'), guest= guest, date_visit= datetime.datetime.now(),
                              view_post= post , entry_page= request.META.get('HTTP_REFERER'))
+    sum_views = post.statistic_set.count()
     comment = post.get_first_level_comments()
+    all_comment = post.comment_set.all()
+    sum_comment = all_comment.count()
     return render(request, 'blog_page/post_detail.html', context={'post': post, 'comment': comment, 'blog': blog,
-                            'sum_comment': post.comment_count, 'sum_views': post.view_count})
+                            'sum_comment': sum_comment, 'sum_views': sum_views})
 
 def registration(request):
     """Регистрация пользователя и отправка ему пароля на почту"""

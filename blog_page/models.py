@@ -135,7 +135,7 @@ class Statistic(models.Model):
     guest = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Пользователь", blank=True, null=True)
     date_visit = models.DateTimeField(verbose_name="Дата и время просмотра", auto_now_add=True)
     view_post = models.ForeignKey(Post, on_delete=models.CASCADE, verbose_name="Просматриваемый пост")
-    entry_page = models.TextField(verbose_name="Страница входа")
+    entry_page = models.TextField(verbose_name="Страница входа", null=True, blank=True)
 
     def __str__(self):
         return self.ip_adres
